@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ZeroLog Example</title>
+    <script src="Zerolog.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+    var str = "this is string. <div>abc</div>";
+    var num = 3;
+    function func(a, b){
+        return a+b;
+    }
+    var obj = {
+        str : str,
+        num : num,
+        func : func,
+        arr : [1, "hi"]
+    };
+    var arr = ["abc", 3, obj, "hello"];
+    arr[9] = 1;
+    console.log(str);
+    console.log(num);
+    console.log(obj);
+    console.log(arr);
+    console.log(str, obj, func, num);
+
+</script>
+</body>
+</html>
