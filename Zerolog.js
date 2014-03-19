@@ -13,13 +13,13 @@ var Zerolog = (function (){
     function isObject(value){return typeof(value) == "object";}
 
     var template = {};
-    template.box = '<div style="border-top-width: 1px; border-top-style: dashed; border-top-color: rgb(153, 153, 153); padding: 10px;">XXX<div style="clear: both;"></div></div>';
+    template.box = '<div style="border-top-width: 1px; border-top-style: dashed; border-top-color: rgb(226, 226, 226); padding: 10px;">XXX<div style="clear: both;"></div></div>';
     template.argBox = '<div style="float: left; margin-right: 20px;">XXX</div>';
     template.str = '<span style="color: rgb(124, 67, 110);">XXX</span>';
     template.num = '<span>XXX</span>';
     template.func = '<div>XXX</div>';
-    template.arr = '<div><div class="title">Array(XXX)</div><div style="margin-left: 10px;display: none;">YYY</div></div>';
-    template.obj = '<div><div class="title">Object{...}</div><div style="margin-left: 10px;display: none;">XXX</div></div>';
+    template.arr = '<div><div style="float:left;"><svg class="hide" style="margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,4 0,8"></polygon> </svg><svg class="show" style="display:none; margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,0 4,8"></polygon> </svg></div><div class="title" style="float:left;">Array(XXX)</div><div style="margin-left: 20px;display: none;">YYY</div></div>';
+    template.obj = '<div><div style="float:left;"><svg class="hide" style="margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,4 0,8"></polygon> </svg><svg class="show" style="display:none; margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,0 4,8"></polygon> </svg></div><div class="title" style="float:left;">Object{...}</div><div style="margin-left: 20px;display: none;">XXX</div></div>';
     template.param = '<div style="float: left;clear: both;"><div style="float:left;">XXX:</div><div style="float:left;margin-left: 5px;">YYY</div></div>';
 
 
@@ -43,12 +43,19 @@ var Zerolog = (function (){
         container.style["cursor"] = "default";
         container.addEventListener("click", function(e){
             if(e.target.className == 'title'){
+                var arrow = e.target.previousElementSibling;
+                var arrowShow = arrow.querySelector('.show');
+                var arrowHide = arrow.querySelector('.hide');
                 var content = e.target.nextElementSibling;
                 if(content.style.display == 'none'){
                     content.style.display = 'block';
+                    arrowShow.style.display = '';
+                    arrowHide.style.display = 'none';
                 }
                 else{
                     content.style.display = 'none';
+                    arrowShow.style.display = 'none';
+                    arrowHide.style.display = '';
                 }
             }
         });
