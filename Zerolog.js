@@ -1,6 +1,6 @@
 /**
  * @author chia
- * @version 0.1.2
+ * @version 0.1.3
  */
 var Zerolog = (function (){
 
@@ -18,8 +18,8 @@ var Zerolog = (function (){
     template.str = '<span style="color: rgb(124, 67, 110);">XXX</span>';
     template.num = '<span>XXX</span>';
     template.func = '<div>XXX</div>';
-    template.arr = '<div><div style="float:left;"><svg class="hide" style="margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,4 0,8"></polygon> </svg><svg class="show" style="display:none; margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,0 4,8"></polygon> </svg></div><div class="title" style="float:left;">Array(XXX)</div><div style="margin-left: 20px;display: none;">YYY</div></div>';
-    template.obj = '<div><div style="float:left;"><svg class="hide" style="margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,4 0,8"></polygon> </svg><svg class="show" style="display:none; margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,0 4,8"></polygon> </svg></div><div class="title" style="float:left;">Object{...}</div><div style="margin-left: 20px;display: none;">XXX</div></div>';
+    template.arr = '<div><div class="arrow" style="float:left;"><svg class="hide" style="margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,4 0,8"></polygon> </svg><svg class="show" style="display:none; margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,0 4,8"></polygon> </svg></div><div class="title" style="float:left;">Array(XXX)</div><div style="margin-left: 20px;display: none;">YYY</div></div>';
+    template.obj = '<div><div class="arrow" style="float:left;"><svg class="hide" style="margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,4 0,8"></polygon> </svg><svg class="show" style="display:none; margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,0 4,8"></polygon> </svg></div><div class="title" style="float:left;">Object{...}</div><div style="margin-left: 20px;display: none;">XXX</div></div>';
     template.param = '<div style="float: left;clear: both;"><div style="float:left;">XXX:</div><div style="float:left;margin-left: 5px;">YYY</div></div>';
 
 
@@ -41,48 +41,77 @@ var Zerolog = (function (){
         }
         container.style["background-color"] = "#fff";
         container.style["cursor"] = "default";
+        
+        initListener();
+    }
+
+    function initListener() {
+        var handlers = {
+            title : function(target){
+                var arrow = target.previousElementSibling;
+                var content = target.nextElementSibling;
+                toggleDetail(arrow, content);
+            },
+            arrow : function(target){
+                var arrow = target;
+                var content = target.nextElementSibling.nextElementSibling;
+                toggleDetail(arrow, content);
+            }
+        };
+
+        function toggleDetail(arrow, content) {
+            var arrowShow = arrow.querySelector('.show');
+            var arrowHide = arrow.querySelector('.hide');
+            if(content.style.display == 'none'){
+                content.style.display = 'block';
+                arrowShow.style.display = '';
+                arrowHide.style.display = 'none';
+            }
+            else{
+                content.style.display = 'none';
+                arrowShow.style.display = 'none';
+                arrowHide.style.display = '';
+            }
+        }
+
         container.addEventListener("click", function(e){
-            if(e.target.className == 'title'){
-                var arrow = e.target.previousElementSibling;
-                var arrowShow = arrow.querySelector('.show');
-                var arrowHide = arrow.querySelector('.hide');
-                var content = e.target.nextElementSibling;
-                if(content.style.display == 'none'){
-                    content.style.display = 'block';
-                    arrowShow.style.display = '';
-                    arrowHide.style.display = 'none';
+            var target = e.target;
+            while(true){
+                var handler = handlers[target.className];
+                if(isFunction(handler)){
+                    handler(target);
+                    break;
                 }
-                else{
-                    content.style.display = 'none';
-                    arrowShow.style.display = 'none';
-                    arrowHide.style.display = '';
+                if(target === container || !target.parentElement){
+                    break;
                 }
+                target = target.parentElement;
             }
         });
     }
 
     Z.log = function(){
-        console.log2.apply(console, arguments);
+        log2.apply(console, arguments);
         log(arguments);
     };
 
     Z.debug = function(){
-        console.debug2.apply(console, arguments);
+        debug2.apply(console, arguments);
         log(arguments);
     };
 
     Z.dir = function(){
-        console.dir2.apply(console, arguments);
+        dir2.apply(console, arguments);
         log(arguments);
     };
 
     Z.trace = function(){
-        console.trace2.apply(console, arguments);
+        trace2.apply(console, arguments);
         log(arguments);
     };
 
     Z.error = function(){
-        console.error2.apply(console, arguments);
+        error2.apply(console, arguments);
         log(arguments);
     };
 
@@ -144,11 +173,11 @@ var Zerolog = (function (){
 
     window.console === undefined && (window.console = {});
     function empty(){}
-    console.log2 = (console.log === undefined ? empty : console.log);
-    console.debug2 = (console.debug === undefined ? empty : console.debug);
-    console.dir2 = (console.dir === undefined ? empty : console.dir);
-    console.trace2 = (console.trace === undefined ? empty : console.trace);
-    console.error2 = (console.error === undefined ? empty : console.error);
+    var log2 = (console.log === undefined ? empty : console.log);
+    var debug2 = (console.debug === undefined ? empty : console.debug);
+    var dir2 = (console.dir === undefined ? empty : console.dir);
+    var trace2 = (console.trace === undefined ? empty : console.trace);
+    var error2 = (console.error === undefined ? empty : console.error);
 
     console.log = Z.log;
     console.debug = Z.debug;
