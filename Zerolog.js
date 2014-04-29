@@ -1,35 +1,11 @@
 /**
  * @author chia
- * @version 0.1.3
+ * @version 1.0.4
  */
 var Zerolog = (function (){
 
-    var container = null;
-
-    function isFunction(value){return typeof(value) == "function";}
-    function isArray(value){return value instanceof Array;}
-    function isString(value){return typeof(value) == "string";}
-    function isNumber(value){return typeof(value) == "number";}
-    function isObject(value){return typeof(value) == "object";}
-
-    var template = {};
-    template.box = '<div style="border-top-width: 1px; border-top-style: dashed; border-top-color: rgb(226, 226, 226); padding: 10px;">XXX<div style="clear: both;"></div></div>';
-    template.argBox = '<div style="float: left; margin-right: 20px;">XXX</div>';
-    template.str = '<span style="color: rgb(124, 67, 110);">XXX</span>';
-    template.num = '<span>XXX</span>';
-    template.func = '<div>XXX</div>';
-    template.arr = '<div><div class="arrow" style="float:left;"><svg class="hide" style="margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,4 0,8"></polygon> </svg><svg class="show" style="display:none; margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,0 4,8"></polygon> </svg></div><div class="title" style="float:left;">Array(XXX)</div><div style="margin-left: 20px;display: none;">YYY</div></div>';
-    template.obj = '<div><div class="arrow" style="float:left;"><svg class="hide" style="margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,4 0,8"></polygon> </svg><svg class="show" style="display:none; margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,0 4,8"></polygon> </svg></div><div class="title" style="float:left;">Object{...}</div><div style="margin-left: 20px;display: none;">XXX</div></div>';
-    template.param = '<div style="float: left;clear: both;"><div style="float:left;">XXX:</div><div style="float:left;margin-left: 5px;">YYY</div></div>';
-
-
-    //转换文本中的特殊字符："<", ">"等
-    function transformText(text){
-        var div = document.createElement('div');
-        div.appendChild(document.createTextNode(text));
-        return div.innerHTML;
-    }
-    var Z = {};
+    var container = null,
+        Z = {};
 
     Z.init = function (id){
         id = id || 'Zerolog';
@@ -42,53 +18,191 @@ var Zerolog = (function (){
         container.style["background-color"] = "#fff";
         container.style["cursor"] = "default";
         
-        initListener();
     }
 
-    function initListener() {
-        var handlers = {
-            title : function(target){
-                var arrow = target.previousElementSibling;
-                var content = target.nextElementSibling;
-                toggleDetail(arrow, content);
-            },
-            arrow : function(target){
-                var arrow = target;
-                var content = target.nextElementSibling.nextElementSibling;
-                toggleDetail(arrow, content);
-            }
-        };
-
-        function toggleDetail(arrow, content) {
-            var arrowShow = arrow.querySelector('.show');
-            var arrowHide = arrow.querySelector('.hide');
-            if(content.style.display == 'none'){
-                content.style.display = 'block';
-                arrowShow.style.display = '';
-                arrowHide.style.display = 'none';
-            }
-            else{
-                content.style.display = 'none';
-                arrowShow.style.display = 'none';
-                arrowHide.style.display = '';
-            }
+    function log(args){
+        if(!container) {
+            Z.init();
         }
 
-        container.addEventListener("click", function(e){
-            var target = e.target;
-            while(true){
-                var handler = handlers[target.className];
-                if(isFunction(handler)){
-                    handler(target);
-                    break;
-                }
-                if(target === container || !target.parentElement){
-                    break;
-                }
-                target = target.parentElement;
-            }
-        });
+        var div = document.createElement("div");
+        div.style["border-top-width"] = "1px";
+        div.style["border-top-style"] = "dashed";
+        div.style["border-top-color"] = "rgb(226, 226, 226)";
+        div.style["padding"] = "10px";
+        for (var i = 0; i < args.length; i++) {
+            var ele = createArgBox(args[i]);
+            div.appendChild(ele);
+        }
+        var clear = document.createElement("div");
+        clear.style["clear"] = "both";
+        div.appendChild(clear);
+        container.appendChild(div);
     }
+
+    function createArgBox(arg){
+        var ele = document.createElement("div");
+        matchs.some(function(item, index){
+            var result = item.match(arg);
+            if(result) {
+                ele.appendChild(item.handler(arg));
+            }
+            return result;
+        });
+        ele.style["float"] = "left";
+        ele.style["margin-right"] = "20px";
+        return ele;
+    }
+
+    var matchs = [
+        { match : isFunction, handler : functionHandler },
+        { match : isString, handler : stringHandler },
+        { match : isNumber, handler : numberHandler },
+        { match : isArray, handler : arrayHandler },
+        { match : isObject, handler : objectHandler },
+        { match : isOther, handler : otherHandler }
+    ];
+
+    function isFunction(value){return typeof(value) == "function";}
+    function isArray(value){return value instanceof Array;}
+    function isString(value){return typeof(value) == "string";}
+    function isNumber(value){return typeof(value) == "number";}
+    function isObject(value){return (value && typeof(value) == "object");}
+    function isOther(value){return true;}
+
+
+    function stringHandler(arg){
+        var ele = document.createElement('span');
+        ele.appendChild(document.createTextNode(arg));
+        ele.style["color"] = "#990000";
+        return ele;
+    }
+
+    function numberHandler(arg){
+        var ele = document.createElement('span');
+        ele.appendChild(document.createTextNode(arg));
+        ele.style["color"] = "#0000FF";
+        return ele;
+    }
+
+    function functionHandler(arg){
+        var ele = document.createElement('span');
+        ele.appendChild(document.createTextNode(('' + arg).match(/.*?\)/)));
+        return ele;
+    }
+
+    var rightArrow = '<svg style="margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,4 0,8"></polygon> </svg>';
+    var downArrow = '<svg style="margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,0 4,8"></polygon> </svg>';
+    
+    function arrayHandler(arg){
+        var ele = document.createElement('div');
+        var title = document.createElement('div');
+        var content = document.createElement('div');
+        ele.appendChild(title);
+        ele.appendChild(content);
+        
+        var titleArrow = document.createElement('div');
+        titleArrow.innerHTML += rightArrow;
+        title.appendChild(titleArrow);
+        var titleName = document.createElement('div');
+        titleName.appendChild(document.createTextNode("Array(" + arg.length + ")"));
+        title.appendChild(titleName);
+        
+        titleArrow.style["float"] = "left";
+        titleName.style["float"] = "left";
+
+        title.addEventListener("click", function(){
+            if(content.hasChildNodes()){
+                titleArrow.innerHTML = rightArrow;
+                content.innerHTML = "";
+                return;
+            }
+            titleArrow.innerHTML = downArrow;
+            for (var i = 0; i < arg.length; i++) {
+                var contentItem = document.createElement('div');
+                var itemIndex = document.createElement('div');
+                var itemContent = document.createElement('div');
+                itemIndex.appendChild(document.createTextNode(i + ":"));
+                itemContent.appendChild(createArgBox(arg[i]));
+                contentItem.appendChild(itemIndex);
+                contentItem.appendChild(itemContent);
+                itemIndex.style["float"] = "left";
+                itemIndex.style["color"] = "rgb(124, 67, 110)";
+                itemContent.style["float"] = "left";
+                itemContent.style["margin-left"] = "5px";
+                contentItem.style["float"] = "left";
+                contentItem.style["clear"] = "both";
+                content.appendChild(contentItem);
+            }
+
+        });
+        
+        title.style["float"] = "left";
+        content.style["float"] = "left";
+        content.style["clear"] = "both";
+        content.style["margin-left"] = "20px";
+
+        return ele;
+    }
+
+    function objectHandler(arg){
+        var ele = document.createElement('div');
+        var title = document.createElement('div');
+        var content = document.createElement('div');
+        ele.appendChild(title);
+        ele.appendChild(content);
+
+        var titleArrow = document.createElement('div');
+        titleArrow.innerHTML += rightArrow;
+        title.appendChild(titleArrow);
+        var titleName = document.createElement('div');
+        titleName.appendChild(document.createTextNode("Object{...}"));
+        title.appendChild(titleName);
+        
+        titleArrow.style["float"] = "left";
+        titleName.style["float"] = "left";
+
+        title.addEventListener("click", function(){
+            if(content.hasChildNodes()){
+                titleArrow.innerHTML = rightArrow;
+                content.innerHTML = "";
+                return;
+            }
+            titleArrow.innerHTML = downArrow;
+            for(var key in arg){
+                var contentItem = document.createElement('div');
+                var itemIndex = document.createElement('div');
+                var itemContent = document.createElement('div');
+                itemIndex.appendChild(document.createTextNode(key + ":"));
+                itemIndex.style["color"] = "rgb(124, 67, 110)";
+                itemContent.appendChild(createArgBox(arg[key]));
+                contentItem.appendChild(itemIndex);
+                contentItem.appendChild(itemContent);
+                itemIndex.style["float"] = "left";
+                itemContent.style["float"] = "left";
+                itemContent.style["margin-left"] = "5px";
+                contentItem.style["float"] = "left";
+                contentItem.style["clear"] = "both";
+                content.appendChild(contentItem);
+            }
+            
+        });
+
+        title.style["float"] = "left";
+        content.style["float"] = "left";
+        content.style["clear"] = "both";
+        content.style["margin-left"] = "20px";
+
+        return ele;
+    }
+
+    function otherHandler(arg){
+        var ele = document.createElement('span');
+        ele.appendChild(document.createTextNode(arg));
+        ele.style["color"] = "#666666";
+        return ele;
+    }
+
 
     Z.log = function(){
         log2.apply(console, arguments);
@@ -114,62 +228,6 @@ var Zerolog = (function (){
         error2.apply(console, arguments);
         log(arguments);
     };
-
-    function log(args){
-        if(!container) {
-            Z.init();
-        }
-        var argBoxs = '';
-        for (var i = 0; i < args.length; i++) {
-            argBoxs += createArgBox(args[i]);
-        }
-        container.innerHTML += template.box.replace('XXX', argBoxs);
-    }
-
-    function createArgBox(arg){
-        var content = '';
-        var handlers = [functionHandler, stringHandler, numberHandler, 
-            arrayHandler, objectHandler];
-        var matchs = [isFunction, isString, isNumber, 
-            isArray, isObject];
-
-        var result = matchs.some(function(value, index){
-            var result = value(arg);
-            if(result) content = handlers[index](arg);
-            return result;
-        });
-        if(!result) content = arg;
-
-        return template.argBox.replace('XXX', content);
-    }
-
-    function stringHandler(arg){
-        return template.str.replace('XXX', transformText(arg));
-    }
-
-    function numberHandler(arg){
-        return template.num.replace('XXX', arg);
-    }
-
-    function functionHandler(arg){
-        return template.func.replace('XXX', ('' + arg).match(/.*?\)/));
-    }
-
-    function arrayHandler(arg){
-        var params = '';
-        for (var i = 0; i < arg.length; i++) {
-            params += template.param.replace('XXX', i).replace('YYY', createArgBox(arg[i]));
-        };
-        return template.arr.replace('XXX', arg.length).replace('YYY', params);
-    }
-
-    function objectHandler(arg){
-        var params = '';
-        for(var key in arg){
-            params += template.param.replace('XXX', key).replace('YYY', createArgBox(arg[key]));
-        }
-        return template.obj.replace('XXX', params);
-    }
 
     window.console === undefined && (window.console = {});
     function empty(){}

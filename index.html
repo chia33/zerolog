@@ -5,6 +5,7 @@
     <script src="Zerolog.js"></script>
 </head>
 <body>
+<a id="abc" href="javascript:void(0)">click me</a>
 <script type="text/javascript">
     var str = "this is string. <div>abc</div>";
     var num = 3;
@@ -24,6 +25,12 @@
     console.log(obj);
     console.log(arr);
     console.log(str, obj, func, num);
+
+    document.querySelector("#abc").addEventListener("click", function(e){
+        console.log(e);
+    });
+
+
 
 </script>
 </body>
