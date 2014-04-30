@@ -40,12 +40,12 @@ var Zerolog = (function (){
         container.appendChild(div);
     }
 
-    function createArgBox(arg){
+    function createArgBox(arg, type){
         var ele = document.createElement("div");
         matchs.some(function(item, index){
             var result = item.match(arg);
             if(result) {
-                ele.appendChild(item.handler(arg));
+                ele.appendChild(item.handler(arg, type));
             }
             return result;
         });
@@ -71,10 +71,15 @@ var Zerolog = (function (){
     function isOther(value){return true;}
 
 
-    function stringHandler(arg){
+    function stringHandler(arg, type){
         var ele = document.createElement('span');
-        ele.appendChild(document.createTextNode(arg));
-        ele.style["color"] = "#990000";
+        if(type == 1){
+            ele.appendChild(document.createTextNode('"' + arg + '"'));
+            ele.style["color"] = "#990000";
+        }
+        else {
+            ele.appendChild(document.createTextNode(arg));
+        }
         return ele;
     }
 
@@ -123,7 +128,7 @@ var Zerolog = (function (){
                 var itemIndex = document.createElement('div');
                 var itemContent = document.createElement('div');
                 itemIndex.appendChild(document.createTextNode(i + ":"));
-                itemContent.appendChild(createArgBox(arg[i]));
+                itemContent.appendChild(createArgBox(arg[i], 1));
                 contentItem.appendChild(itemIndex);
                 contentItem.appendChild(itemContent);
                 itemIndex.style["float"] = "left";
@@ -175,7 +180,7 @@ var Zerolog = (function (){
                 var itemContent = document.createElement('div');
                 itemIndex.appendChild(document.createTextNode(key + ":"));
                 itemIndex.style["color"] = "rgb(124, 67, 110)";
-                itemContent.appendChild(createArgBox(arg[key]));
+                itemContent.appendChild(createArgBox(arg[key], 1));
                 contentItem.appendChild(itemIndex);
                 contentItem.appendChild(itemContent);
                 itemIndex.style["float"] = "left";
