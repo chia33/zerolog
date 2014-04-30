@@ -110,7 +110,7 @@ var Zerolog = (function (){
         titleArrow.innerHTML += rightArrow;
         title.appendChild(titleArrow);
         var titleName = document.createElement('div');
-        titleName.appendChild(document.createTextNode("Array(" + arg.length + ")"));
+        titleName.appendChild(document.createTextNode("Array[" + arg.length + "]"));
         title.appendChild(titleName);
         
         titleArrow.style["float"] = "left";
