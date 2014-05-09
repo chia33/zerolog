@@ -163,7 +163,10 @@ var Zerolog = (function (){
         ele.appendChild(title);
         ele.appendChild(content);
 
-        var constructorName = arg.constructor.name === "" ? "Object" : arg.constructor.name;
+        var constructorName = "Object";
+        if(arg.constructor && arg.constructor.name && arg.constructor.name !== ""){
+            constructorName = arg.constructor.name;
+        }
         constructorName += "{";
         if(keys.length > 0) {
             var titleArrow = document.createElement('div');
