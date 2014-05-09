@@ -157,17 +157,23 @@ var Zerolog = (function (){
         ele.appendChild(title);
         ele.appendChild(content);
 
-        var titleArrow = document.createElement('div');
-        titleArrow.innerHTML += rightArrow;
-        title.appendChild(titleArrow);
-        var titleName = document.createElement('div');
-        titleName.appendChild(document.createTextNode("Object{...}"));
-        title.appendChild(titleName);
-        
-        titleArrow.style["float"] = "left";
-        titleName.style["float"] = "left";
+        var constructorName = arg.constructor.name + "{";
+        for(var key in arg){
+            var titleArrow = document.createElement('div');
+            titleArrow.innerHTML += rightArrow;
+            title.appendChild(titleArrow);
+            titleArrow.style["float"] = "left";
+            constructorName += "...";
+            title.addEventListener("click", titleClick);
+            break;
+        }
+        constructorName += "}"
 
-        title.addEventListener("click", function(){
+        var titleName = document.createElement('div');
+        titleName.appendChild(document.createTextNode(constructorName));
+        title.appendChild(titleName);
+
+        function titleClick(){
             if(content.hasChildNodes()){
                 titleArrow.innerHTML = rightArrow;
                 content.innerHTML = "";
@@ -190,9 +196,9 @@ var Zerolog = (function (){
                 contentItem.style["clear"] = "both";
                 content.appendChild(contentItem);
             }
-            
-        });
+        }
 
+        titleName.style["float"] = "left";
         title.style["float"] = "left";
         content.style["float"] = "left";
         content.style["clear"] = "both";
