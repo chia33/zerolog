@@ -99,78 +99,24 @@ var Zerolog = (function (){
     var rightArrow = '<svg style="margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,4 0,8"></polygon> </svg>';
     var downArrow = '<svg style="margin-right: 3px;" width="8" height="8" xmlns="http://www.w3.org/2000/svg" version="1.1"> <polygon fill="#909090" points="0,0 8,0 4,8"></polygon> </svg>';
     
+
     function arrayHandler(arg){
+        var keys = getOwnPropertyNames(arg);
+
         var ele = document.createElement('div');
         var title = document.createElement('div');
         var content = document.createElement('div');
         ele.appendChild(title);
         ele.appendChild(content);
-        
+
         var titleArrow = document.createElement('div');
         titleArrow.innerHTML += rightArrow;
         title.appendChild(titleArrow);
+        titleArrow.style["float"] = "left";
+        title.addEventListener("click", titleClick);
+
         var titleName = document.createElement('div');
         titleName.appendChild(document.createTextNode("Array[" + arg.length + "]"));
-        title.appendChild(titleName);
-        
-        titleArrow.style["float"] = "left";
-        titleName.style["float"] = "left";
-
-        title.addEventListener("click", function(){
-            if(content.hasChildNodes()){
-                titleArrow.innerHTML = rightArrow;
-                content.innerHTML = "";
-                return;
-            }
-            titleArrow.innerHTML = downArrow;
-            for (var i = 0; i < arg.length; i++) {
-                var contentItem = document.createElement('div');
-                var itemIndex = document.createElement('div');
-                var itemContent = document.createElement('div');
-                itemIndex.appendChild(document.createTextNode(i + ":"));
-                itemContent.appendChild(createArgBox(arg[i], 1));
-                contentItem.appendChild(itemIndex);
-                contentItem.appendChild(itemContent);
-                itemIndex.style["float"] = "left";
-                itemIndex.style["color"] = "rgb(124, 67, 110)";
-                itemContent.style["float"] = "left";
-                itemContent.style["margin-left"] = "5px";
-                contentItem.style["float"] = "left";
-                contentItem.style["clear"] = "both";
-                content.appendChild(contentItem);
-            }
-
-        });
-        
-        title.style["float"] = "left";
-        content.style["float"] = "left";
-        content.style["clear"] = "both";
-        content.style["margin-left"] = "20px";
-
-        return ele;
-    }
-
-    function objectHandler(arg){
-        var ele = document.createElement('div');
-        var title = document.createElement('div');
-        var content = document.createElement('div');
-        ele.appendChild(title);
-        ele.appendChild(content);
-
-        var constructorName = arg.constructor.name + "{";
-        for(var key in arg){
-            var titleArrow = document.createElement('div');
-            titleArrow.innerHTML += rightArrow;
-            title.appendChild(titleArrow);
-            titleArrow.style["float"] = "left";
-            constructorName += "...";
-            title.addEventListener("click", titleClick);
-            break;
-        }
-        constructorName += "}"
-
-        var titleName = document.createElement('div');
-        titleName.appendChild(document.createTextNode(constructorName));
         title.appendChild(titleName);
 
         function titleClick(){
@@ -180,7 +126,8 @@ var Zerolog = (function (){
                 return;
             }
             titleArrow.innerHTML = downArrow;
-            for(var key in arg){
+            for(var i in keys){
+                var key = keys[i];
                 var contentItem = document.createElement('div');
                 var itemIndex = document.createElement('div');
                 var itemContent = document.createElement('div');
@@ -205,6 +152,82 @@ var Zerolog = (function (){
         content.style["margin-left"] = "20px";
 
         return ele;
+    }
+
+    function objectHandler(arg){
+        var keys = getOwnPropertyNames(arg);
+
+        var ele = document.createElement('div');
+        var title = document.createElement('div');
+        var content = document.createElement('div');
+        ele.appendChild(title);
+        ele.appendChild(content);
+
+        var constructorName = arg.constructor.name === "" ? "Object" : arg.constructor.name;
+        constructorName += "{";
+        if(keys.length > 0) {
+            var titleArrow = document.createElement('div');
+            titleArrow.innerHTML += rightArrow;
+            title.appendChild(titleArrow);
+            titleArrow.style["float"] = "left";
+            constructorName += "...";
+            title.addEventListener("click", titleClick);
+        }
+        constructorName += "}";
+
+        var titleName = document.createElement('div');
+        titleName.appendChild(document.createTextNode(constructorName));
+        title.appendChild(titleName);
+
+        function titleClick(){
+            if(content.hasChildNodes()){
+                titleArrow.innerHTML = rightArrow;
+                content.innerHTML = "";
+                return;
+            }
+            titleArrow.innerHTML = downArrow;
+            for(var i in keys){
+                var key = keys[i];
+                var contentItem = document.createElement('div');
+                var itemIndex = document.createElement('div');
+                var itemContent = document.createElement('div');
+                itemIndex.appendChild(document.createTextNode(key + ":"));
+                itemIndex.style["color"] = "rgb(124, 67, 110)";
+                itemContent.appendChild(createArgBox(arg[key], 1));
+                contentItem.appendChild(itemIndex);
+                contentItem.appendChild(itemContent);
+                itemIndex.style["float"] = "left";
+                itemContent.style["float"] = "left";
+                itemContent.style["margin-left"] = "5px";
+                contentItem.style["float"] = "left";
+                contentItem.style["clear"] = "both";
+                content.appendChild(contentItem);
+            }
+        }
+
+        titleName.style["float"] = "left";
+        title.style["float"] = "left";
+        content.style["float"] = "left";
+        content.style["clear"] = "both";
+        content.style["margin-left"] = "20px";
+
+        return ele;
+    }
+
+    function getOwnPropertyNames(arg) {
+        var result = [];
+        if(Object.getOwnPropertyNames){
+            result = result.concat(Object.getOwnPropertyNames(arg));
+            if(arg.__proto__){
+                result.push("__proto__");
+            }
+        }
+        else {
+            for(var key in arg) {
+                result.push(key);
+            }
+        }
+        return result;
     }
 
     function otherHandler(arg){
